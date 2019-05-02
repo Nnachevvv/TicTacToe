@@ -18,14 +18,7 @@ void Game::StartGame()
 
 void Game::ChangeSizeOfGird(int xy)
 {
-	int x = xy / 10;
-	int y = xy % 5;
-	if (x>10 || x<3 || x>y)
-	{
-		std::cout << "Error, can't create board with these size! Give values between 3 and 10!"<<std::endl;
-		return;
-	}
-	board.ChangeSize(x, y);
+	board.ChangeSize(xy);
 }
 
 void Game::ResetResult()
@@ -36,7 +29,6 @@ void Game::ResetResult()
 
 void Game::PlayTurn(int xy)
 {
-	int x = xy / 10;
-	int y = xy % 5;
-	board.PlayTurn(x, y);
+	
+	board.PlayTurn(xy);
 }

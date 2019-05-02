@@ -1,4 +1,5 @@
 #pragma once
+#include "Point.h"
 const int DEFAULT_HEIGHT = 3;
 const int DEFAULT_WIDTH = 3;
 #include <iostream>
@@ -12,10 +13,10 @@ public:
 	Board & operator = (const Board & board)=delete;
 
 public:
-	void ChangeSize(int height,int width);
-	void PlayTurn(int x,int y);
+	void ChangeSize(int xy);
+	void PlayTurn(int xy);
 private:
-	char ** gird;
+	Point ** gird;
 	int height;
 	int width;
 	Player FirstPlayer;
@@ -23,6 +24,7 @@ private:
 	Player * currentTurn;
 private:
 	void InitGird(int height, int width);
+	bool SetGirdSize(int xy);
 	void SetNextTurn();
 	void CheckForFinish();
 	void FreeMemory();
