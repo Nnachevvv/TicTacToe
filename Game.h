@@ -5,16 +5,19 @@ class Game
 {
 public:
 	Game();
-	~Game();
-	
+	void GetCommand();
+private:
 	void StartGame();
-	void ChangeSizeOfGird(int xy);
+	void ChangeSizeOfGird();
 	void ResetResult();
-	void PlayTurn(int xy);
 private:
 	Board board;
-	int FirstPlayerResult;
-	int SecondPlayerResult;
+	Player firstPlayer;
+	Player secondPlayer;
+	Player * currentPlayer;
+private:
+	void InitCharacter();
+	void SetNextTurn();
 	void Draw();
 };
 

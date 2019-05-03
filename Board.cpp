@@ -4,8 +4,7 @@
 
 Board::Board()
 {
-	currentTurn = &FirstPlayer;
-	InitGird(DEFAULT_HEIGHT, DEFAULT_WIDTH);
+	InitGird(DEFAULT_SIZE);
 }
 
 
@@ -16,11 +15,11 @@ Board::~Board()
 
 
 
-void Board::ChangeSize(int xy)
+void Board::ChangeSize(int size)
 {
-	if(SetGirdSize(xy))
+	if(ValidSize(size))
 	{
-		InitGird(height, width);
+		InitGird(size);
 	}
 	else
 	{
@@ -29,76 +28,187 @@ void Board::ChangeSize(int xy)
 	
 }
 
-void Board::PlayTurn(int xy)
+void Board::PlayTurn(int xy,Player & player)
 {
-	//TO DO : CHECK IF GIRD CONTAINS POINT
-
-	gird[0][0] = currentTurn->GetCharacter();
-	SetNextTurn();
-	CheckForFinish();
+	Point point(xy);
+	gird[point.getX()][point.getY()].Marked(player.GetCharacter());
+	if (CheckForFinish(point.getX(), point.getY()))
+	{
+		std::cout << "Player with symbol win " << player.GetCharacter()<<std::endl;
+		player.WinIncrementScore();
+		InitGird(size);
+	};
 }
 
-void Board::InitGird(int height, int width)
+bool Board::ValidMove(int xy)
 {
-	if (height<DEFAULT_HEIGHT || width<DEFAULT_HEIGHT ||width>10 ||height>10)
+	Point point(xy);
+	if (point.getX() < 0 || point.getY() <0 || 
+		point.getX()>=this->size || point.getY()>=this->size  )
 	{
-		std::cout << "Can't set gird with this size"<<std::endl;
-		return;
+		std::cout << "Invalid Position!" << std::endl;
+		return false;
 	}
-	FreeMemory();
-	gird = new Point*[height];
-	for (size_t i = 0; i < height; i++)
+	if (point!=gird[point.getX()][point.getY()])
 	{
-		gird[i] = new Point[width];
-		for (size_t j = 0; j < width; j++)
+		std::cout << "This position is taken , can't place symbol here!Try again!" << std::endl;
+		return false;
+	}
+	return true;
+}
+
+int Board::CheckBottom(int x, int y)
+{
+	int count = 0;
+	int curr_x = x-1;
+	while (curr_x > 0 && gird[curr_x][y] == gird[x][y])
+	{
+		--curr_x;
+		count++;
+	}
+	return count;
+}
+
+int Board::CheckLeft(int x, int y)
+{
+	int count = 0;
+	int curr_y = y-1;
+	while (curr_y > 0 && gird[curr_y][y] == gird[x][y])
+	{
+		--curr_y;
+		count++;
+	}
+	return count;
+}
+
+int Board::CheckRight(int x, int y)
+{
+	int count = 0;
+	int curr_y = y+1;
+	while (curr_y < size && gird[curr_y][y] == gird[x][y])
+	{
+		++curr_y;
+		count++;
+	}
+	return count;
+}
+
+bool Board::CheckDiagonal(int x ,int y)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (gird[i][i]!=gird[x][y])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+int Board::CheckUp(int x, int y)
+{
+	int count = 0;
+	int curr_x = x+1;
+	while (curr_x < size && (gird[curr_x][y] == gird[x][y]))
+	{
+		++curr_x;
+		count++;
+	}
+	return count;
+}
+
+void Board::InitGird(int size)
+{
+	FreeMemory();
+	this->size = size;
+	gird = new Point*[size];
+	for (int i = 0; i < size; i++)
+	{
+		gird[i] = new Point[size];
+		for (int j = 0; j < size; j++)
 		{
 			gird[i][j].Set_Point(i,j);
 		}
 	}
-	this->height = height;
-	this->width = width;
 }
 
-bool Board::SetGirdSize(int xy)
+bool Board::ValidSize(int size)
 {
-	if (xy < 10)
-	{
-		this->height = 0;
-	}
-	else
-	{
-		this->height = xy / 10;
-	}
-	this->width = xy % 10;
-	if (height < 3 || width < 3 || height > 10 || width > 10)
+	if (size < DEFAULT_SIZE && size>MAX_SIZE)
 	{
 		return false;
 	}
 	return true;
 }
 
-void Board::SetNextTurn()
+
+
+bool Board::CheckForFinish(int x, int y)
 {
-	if (*currentTurn == FirstPlayer)
+	int winningPositions = 1;
+	winningPositions += CheckUp(x, y);
+	winningPositions += CheckBottom(x,y);
+	if (winningPositions>=size)
 	{
-		currentTurn == &SecondPlayer;
+		return true;
 	}
-	else
+	winningPositions = 1;
+	winningPositions += CheckLeft(x, y);
+	winningPositions += CheckRight(x, y);
+	if (winningPositions >= size)
 	{
-		currentTurn == &FirstPlayer;
+		return true;
 	}
+	if (CheckDiagonal(x,y))
+	{
+		return true;
+	}
+	return false;
+
+
 }
 
-void Board::CheckForFinish()
-{
-}
+
 
 void Board::FreeMemory()
 {
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < size; i++)
 	{
 		delete[] gird[i];
 	}
 	delete[] gird;
 	gird = nullptr;
+}
+
+std::ostream & operator<<(std::ostream & out, const Board & c)
+{
+	out << " ";
+	for (int j = 0; j < c.size; j++)
+	{
+		out << "  "<< j << " ";
+	}
+	out << std::endl;
+	for (int i = 0; i < c.size; i++)
+	{
+		out << " ";
+		for (int j = 0; j < c.size; j++)
+		{
+			out << "+---";
+		}
+		out << "+" << std::endl;
+		out << i;
+		out << "|";
+		for (int j = 0; j < c.size; j++)
+		{
+			out <<" "<< c.gird[i][j] << " |";
+		}
+		out << std::endl;
+	}
+	out << " ";
+	for (int i = 0; i < c.size; i++)
+	{
+		out << "+---";
+	}
+	out << "+" << std::endl;
+	return out;
 }
