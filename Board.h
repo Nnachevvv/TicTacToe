@@ -18,21 +18,24 @@ public:
 
 public:
 	void ChangeSize(int xy);
-	void PlayTurn(int xy,Player & player);
-	bool ValidMove(int xy);
+	void PlayTurn(const Point & point,Player & player);
+	bool ValidMove(const Point & point);
+	bool CheckForFinish(const Point & point);
+	void InitGird();
+	bool isDraw();
 private:
-	bool CheckForFinish(int x, int y);
 	int CheckUp(int x, int y);
 	int CheckBottom(int x, int y);
 	int CheckLeft(int x, int y);
 	int CheckRight(int x , int y);
 	bool CheckDiagonal(int x, int y);
-private:
+	bool CheckAntiDiagonal(int x, int y);
+	private:
 	Point ** gird;
 	int size;
+	int takenCells;
 	
 private:
-	void InitGird(int size);
 	bool ValidSize(int size);
 	void FreeMemory();
 };

@@ -10,14 +10,13 @@ private:
 	void StartGame();
 	void ChangeSizeOfGird();
 	void ResetResult();
+	void InitCharacter();
+	void SetNextTurn();
+	void Draw();
 private:
 	Board board;
 	Player firstPlayer;
 	Player secondPlayer;
 	Player * currentPlayer;
-private:
-	void InitCharacter();
-	void SetNextTurn();
-	void Draw();
 };
 

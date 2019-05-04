@@ -2,9 +2,10 @@
 #include <iostream>
 
 
-Board::Board()
+Board::Board():takenCells(0),gird(nullptr)
 {
-	InitGird(DEFAULT_SIZE);
+	this->size = DEFAULT_SIZE;
+	InitGird();
 }
 
 
@@ -19,7 +20,9 @@ void Board::ChangeSize(int size)
 {
 	if(ValidSize(size))
 	{
-		InitGird(size);
+		FreeMemory();
+		this->size = size;
+		InitGird();
 	}
 	else
 	{
@@ -28,28 +31,25 @@ void Board::ChangeSize(int size)
 	
 }
 
-void Board::PlayTurn(int xy,Player & player)
+void Board::PlayTurn(const Point & point,Player & player)
 {
-	Point point(xy);
 	gird[point.getX()][point.getY()].Marked(player.GetCharacter());
-	if (CheckForFinish(point.getX(), point.getY()))
-	{
-		std::cout << "Player with symbol win " << player.GetCharacter()<<std::endl;
-		player.WinIncrementScore();
-		InitGird(size);
-	};
+	++takenCells;
+	
 }
 
-bool Board::ValidMove(int xy)
+bool Board::ValidMove(const Point & point)
 {
-	Point point(xy);
-	if (point.getX() < 0 || point.getY() <0 || 
-		point.getX()>=this->size || point.getY()>=this->size  )
+	int XCordinatePoint = point.getX();
+	int YCordinatePoint = point.getY();
+
+	if (XCordinatePoint < 0 || YCordinatePoint <0 
+		|| XCordinatePoint >= this->size || YCordinatePoint >= this->size  )
 	{
 		std::cout << "Invalid Position!" << std::endl;
 		return false;
 	}
-	if (point!=gird[point.getX()][point.getY()])
+	if (point != gird[XCordinatePoint][YCordinatePoint])
 	{
 		std::cout << "This position is taken , can't place symbol here!Try again!" << std::endl;
 		return false;
@@ -61,7 +61,7 @@ int Board::CheckBottom(int x, int y)
 {
 	int count = 0;
 	int curr_x = x-1;
-	while (curr_x > 0 && gird[curr_x][y] == gird[x][y])
+	while (curr_x >= 0 && gird[curr_x][y] == gird[x][y])
 	{
 		--curr_x;
 		count++;
@@ -73,7 +73,7 @@ int Board::CheckLeft(int x, int y)
 {
 	int count = 0;
 	int curr_y = y-1;
-	while (curr_y > 0 && gird[curr_y][y] == gird[x][y])
+	while (curr_y >= 0 && gird[x][curr_y] == gird[x][y])
 	{
 		--curr_y;
 		count++;
@@ -85,7 +85,7 @@ int Board::CheckRight(int x, int y)
 {
 	int count = 0;
 	int curr_y = y+1;
-	while (curr_y < size && gird[curr_y][y] == gird[x][y])
+	while (curr_y < size && gird[x][curr_y] == gird[x][y])
 	{
 		++curr_y;
 		count++;
@@ -105,6 +105,25 @@ bool Board::CheckDiagonal(int x ,int y)
 	return true;
 }
 
+bool Board::CheckAntiDiagonal(int x, int y)
+{
+	int jCounter = 0;
+	for (int i = size-1; i >= 0; i--)
+	{
+		if (gird[i][jCounter] != gird[x][y])
+		{
+			return false;
+		}
+		++jCounter;
+	}
+	return true;
+}
+
+bool Board::isDraw()
+{
+	return this->takenCells == (size*size);
+}
+
 int Board::CheckUp(int x, int y)
 {
 	int count = 0;
@@ -117,10 +136,8 @@ int Board::CheckUp(int x, int y)
 	return count;
 }
 
-void Board::InitGird(int size)
+void Board::InitGird()
 {
-	FreeMemory();
-	this->size = size;
 	gird = new Point*[size];
 	for (int i = 0; i < size; i++)
 	{
@@ -141,10 +158,10 @@ bool Board::ValidSize(int size)
 	return true;
 }
 
-
-
-bool Board::CheckForFinish(int x, int y)
+bool Board::CheckForFinish(const Point & point)
 {
+	int x = point.getX();
+	int y = point.getY();
 	int winningPositions = 1;
 	winningPositions += CheckUp(x, y);
 	winningPositions += CheckBottom(x,y);
@@ -159,7 +176,7 @@ bool Board::CheckForFinish(int x, int y)
 	{
 		return true;
 	}
-	if (CheckDiagonal(x,y))
+	if (CheckDiagonal(x,y) || CheckAntiDiagonal(x,y))
 	{
 		return true;
 	}
@@ -168,10 +185,9 @@ bool Board::CheckForFinish(int x, int y)
 
 }
 
-
-
 void Board::FreeMemory()
 {
+	takenCells = 0;
 	for (int i = 0; i < size; i++)
 	{
 		delete[] gird[i];

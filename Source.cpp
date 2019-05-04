@@ -7,5 +7,5 @@ int main()
 {
 
 	Game game;
-	game.GetCommand();
+	return 0;
 }

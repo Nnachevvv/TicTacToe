@@ -1,28 +1,48 @@
 #include "Game.h"
 #include <fstream>
-
+#include "Point.h"
 
 Game::Game()
 {
+	InitCharacter();
 	currentPlayer = &firstPlayer;
+	GetCommand();
 }
 
 
 void Game::StartGame()
 {
-	InitCharacter();
 	Draw();
 
 	int xy;
-	std::cout << "Enter position for next move:"<<std::endl;
 	while (true)
 	{
+		std::cout << "Enter position for next move:" << std::endl;
 		std::cin >> xy;
-		if (board.ValidMove(xy))
+		Point point(xy);
+		if (board.ValidMove(point))
 		{
-			board.PlayTurn(xy, *currentPlayer);
+			board.PlayTurn(point, *currentPlayer);
+			if (board.CheckForFinish(point))
+			{
+				currentPlayer->WinIncrementScore();
+				Draw();
+				std::cout << "Player with symbol "<< currentPlayer->GetCharacter() << " win!"<< std::endl;
+				SetNextTurn();
+				board.InitGird();
+				GetCommand();
+				break;
+			}
+			else if (board.isDraw())
+			{
+					Draw();
+					std::cout << "Draw!" << std::endl;
+					board.InitGird();
+					GetCommand();
+					break;
+			}
 			SetNextTurn();
-			system("cls");
+			
 			Draw();
 		}
 	}
@@ -79,15 +99,16 @@ void Game::SetNextTurn()
 
 void Game::Draw()
 {
+	system("cls");
 	std::cout << "Player 1      Player 2" << std::endl;
-	std::cout << firstPlayer<<"            " << secondPlayer<<std::endl;
+	std::cout << "   "<< firstPlayer<<"            " <<"   "<< secondPlayer<<std::endl;
 	std::cout << board;
 	std::cout << std::endl;
 }
 
 void Game::GetCommand()
 {
-	std::cout << "Enter command : Play  | ChangeGird | ResetScore " << std::endl;
+	std::cout << "Enter command : Play  | ChangeGird | ResetScore | Quit" << std::endl;
 	char buffer[64];
 	std::cin >> buffer;
 	while (true)
@@ -103,6 +124,10 @@ void Game::GetCommand()
 		else if (!strcmp(buffer, "ChangeGird"))
 		{
 			this->ChangeSizeOfGird();
+		}
+		else if (!strcmp(buffer, "Quit"))
+		{
+			return;
 		}
 		else {
 			std::cout << "Invalid command!" << std::endl;

@@ -36,12 +36,12 @@ void Point::Set_Point(int x, int y)
 	this->y = y;
 }
 
-bool Point::operator==(const Point & point)
+bool Point::operator==(const Point & point) const
 {
 	return value == point.value;
 }
 
-bool Point::operator!=(const Point & point)
+bool Point::operator!=(const Point & point) const
 {
 	return !(*this == point);
 }
